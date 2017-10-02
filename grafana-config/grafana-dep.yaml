@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: kube-system
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io.scrape: "false"
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - image: weaveworksdemos/grafana:latest
+        name: grafana
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      - name: gfdatasource
+        image: weaveworks/gfdatasource:master-1708580
+        imagePullPolicy: Always
+        args:
+          - --grafana-url=http://admin:admin@127.0.0.1:80/api
+          - --data-source-url=http://weave-cortex-agent.kube-system.svc.cluster.local
+          - --name=prometheus
+          - --type=prometheus
